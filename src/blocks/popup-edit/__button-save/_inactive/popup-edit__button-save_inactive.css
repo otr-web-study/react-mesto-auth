@@ -1,0 +1,11 @@
+.popup-edit__button-save_inactive {
+  color: black;
+  background: white;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  opacity: .2;
+  border: 1px solid black;
+}

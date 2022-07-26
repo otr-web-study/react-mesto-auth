@@ -1,0 +1,12 @@
+.profile__author-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+@media screen and (max-width: 767px) {
+  .profile__author-container {
+    justify-content: center;
+    margin-right: 10px;
+  }
+}

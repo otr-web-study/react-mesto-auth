@@ -1,0 +1,14 @@
+.popup-edit__title {
+  width: 100%;
+  margin: 0;
+  font-size: 24px;
+  line-height: 29.05px;
+  font-weight: 900;
+}
+
+@media screen and (max-width: 468px) {
+  .popup-edit__title  {
+    font-size: 18px;
+    line-height: 21.78px;
+  }
+}

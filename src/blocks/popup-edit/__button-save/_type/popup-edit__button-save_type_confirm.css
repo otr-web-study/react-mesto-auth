@@ -1,0 +1,10 @@
+.popup-edit__button-save_type_confirm {
+  margin-top: 38px;
+}
+
+
+@media screen and (max-width: 468px) {
+  .popup-edit__button-save_type_confirm  {
+    margin-top: 75px;
+  }
+}

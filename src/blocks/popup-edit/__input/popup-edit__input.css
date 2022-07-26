@@ -1,0 +1,8 @@
+.popup-edit__input {
+  font-size: 14px;
+  line-height: 16.94px;
+  font-weight: 400;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, .2);
+  height: 27px;
+}
