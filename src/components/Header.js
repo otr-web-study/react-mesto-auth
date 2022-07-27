@@ -3,18 +3,18 @@ import ProtectedRoute from "./ProtectedRoute";
 import { Route, Link, Switch } from "react-router-dom";
 import HeaderProfile from "./HeaderProfile";
 
-function Header() {
+function Header({loggedIn}) {
   return (
     <header className="header page__header">
       <img className="header__logo" src={logo} alt=""/>
       <Switch>
         <Route path={"/sign-in"}>
-          <Link to="/sign-up" className="link header__link">Регистрация</Link>
+          <Link to="sign-up" className="link header__link">Регистрация</Link>
         </Route>
         <Route path={"/sign-up"}>
-          <Link to="/sign-in" className="link header__link">Войти</Link>
+          <Link to="sign-in" className="link header__link">Войти</Link>
         </Route>
-        <ProtectedRoute exact path="/" component={HeaderProfile} />
+        <ProtectedRoute exact path="/" component={HeaderProfile} loggedIn={loggedIn} />
       </Switch>
     </header>
   );

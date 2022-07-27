@@ -1,11 +1,12 @@
 import {useInputWithValidation, useFormValid} from "../utils/formValidators";
 
-function AuthForm({isPending, title, buttonTitle, buttonTitlePending, name, children}) {
+function AuthForm({isPending, title, buttonTitle, buttonTitlePending, name, onSubmit, children}) {
   const email = useInputWithValidation("", true);
   const password = useInputWithValidation("", true);
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
+    onSubmit(email.value, password.value);
   }
 
   const [isFormValid] = useFormValid([email, password]);

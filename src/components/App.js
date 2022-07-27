@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Switch } from "react-router-dom"
+import { Route, Switch, useHistory } from "react-router-dom"
 import ProtectedRoute from "./ProtectedRoute";
 import Header from "./Header";
 import Main from "./Main";
@@ -13,6 +13,7 @@ import InfoTooltip from "./InfoTooltip";
 import Login from "./Login";
 import Register from "./Register";
 import api from "../utils/Api";
+import auth from "../utils/Auth"
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -20,14 +21,18 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(true);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [isPendingServerResponse, setIsPendingServerResponse] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [deletedCard, setDeletedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState("tst");
+  const [userEmail, setUserEmail] = useState("");
+  
+  const history = useHistory();
+
+  let isAuthSuccess = false;
 
   useEffect(() => {
     api.batchFetch([api.getUserData(), api.getInitialCards()])
@@ -36,6 +41,21 @@ function App() {
         setCards(initialCards);
       })
       .catch(err => {console.log(err)});
+  }, []);
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      auth.checkJWT(jwt)
+        .then((data) => {
+          if (data) {
+            setLoggedIn(true);
+            setUserEmail(data.data.email);
+            history.push("/");
+          }
+        })
+        .catch(err => {console.log(err)});
+    }
   }, []);
 
   const handleEditAvatarClick = () => {
@@ -126,11 +146,57 @@ function App() {
       .finally(() => {setIsPendingServerResponse(false)});
   }
 
+  const handleRegister = (email, password) => {
+    setIsPendingServerResponse(true);
+
+    auth.register(email, password)
+      .then(() => {
+        history.push("/sign-in");
+      })
+      .catch(err => {
+        console.log(err);
+        isAuthSuccess = false;
+        setIsInfoTooltipOpen(true);
+      })
+      .finally(() => {setIsPendingServerResponse(false)});
+  }
+
+  const handleLogin = (email, password) => {
+    setIsPendingServerResponse(true);
+
+    auth.login(email, password)
+      .then((data) => {
+        if (data.token) {
+          localStorage.setItem("jwt", data.token);
+          setLoggedIn(true);
+          setUserEmail(email);
+          isAuthSuccess = true;
+          setIsInfoTooltipOpen(true);
+          history.push("/");
+        }
+        return Promise.reject("Ошибка: ответ не содержит данные токена.");
+      })
+      .catch(err => {
+        console.log(err);
+        isAuthSuccess = false;
+        setIsInfoTooltipOpen(true);
+      })
+      .finally(() => {setIsPendingServerResponse(false)});
+  }
+
+  const handleLogout = () => {
+    localStorage.setItem("jwt", "");
+    setLoggedIn(false);
+    setUserEmail("");
+    history.push("/sign-in");
+  }
+  console.log("app " + loggedIn);
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <AuthContext.Provider
-        value={{loggedIn, email}}>
-        <Header />
+        value={{userEmail, handleLogout}}>
+        <Header 
+          loggedIn={loggedIn}/>
         <Switch>
           <ProtectedRoute
             exact path="/"
@@ -143,10 +209,10 @@ function App() {
             onCardLike={handleCardLike}
             onCardDelete={handleCardDelete} />
           <Route path="/sign-in">
-            <Login />
+            <Login onSubmit={handleLogin}/>
           </Route>
           <Route path="/sign-up">
-            <Register />
+            <Register onSubmit={handleRegister}/>
           </Route>
         </Switch>
         <Footer/>
@@ -175,7 +241,7 @@ function App() {
           </button>
         </PopupWithForm>
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-        <InfoTooltip isOpen={isInfoTooltipOpen} isSuccess={false} onClose={closeAllPopups} />
+        <InfoTooltip isOpen={isInfoTooltipOpen} isSuccess={isAuthSuccess} onClose={closeAllPopups} />
       </AuthContext.Provider>
     </CurrentUserContext.Provider>
   );

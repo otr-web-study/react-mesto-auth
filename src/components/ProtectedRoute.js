@@ -4,11 +4,9 @@ import { AuthContext } from "../contexts/AuthContext";
 
 
 const ProtectedRoute = ({ component: Component, ...props }) => {
-  const value = React.useContext(AuthContext);
-
   return (
     <Route>
-      {() => value.loggedIn ? <Component {...props} />: <Redirect to="./sign-in" />}
+      {() => props.loggedIn ? <Component {...props} />: <Redirect to="./sign-in" />}
     </Route>
   );
 };
