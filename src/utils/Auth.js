@@ -9,8 +9,7 @@ class Auth {
       return res.json();
     }
     return res.text()
-      .then(text => Promise.reject(text))
-      .catch((err) => Promise.reject(`Ошибка: ${res.status}: ${err}`));
+      .then(text => Promise.reject(`Ошибка: ${res.status}: ${text}`));
   }
 
   register(email, password) {

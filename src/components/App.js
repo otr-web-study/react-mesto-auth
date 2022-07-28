@@ -34,15 +34,18 @@ function App() {
   const history = useHistory();
 
   const ESC_KEY = "Escape";
+  const messageAuthSuccess = "Вы успешно зарегистрировались!";
+  const messageAuthFail = "Что-то пошло не так! Попробуйте еще раз.";
 
   useEffect(() => {
-    api.batchFetch([api.getUserData(), api.getInitialCards()])
-      .then(([userData, initialCards]) => {
-        setCurrentUser(userData);
-        setCards(initialCards);
-      })
-      .catch(err => {console.log(err)});
-  }, []);
+    if (loggedIn) {
+      api.batchFetch([api.getUserData(), api.getInitialCards()])
+        .then(([userData, initialCards]) => {
+          setCurrentUser(userData);
+          setCards(initialCards);
+        })
+        .catch(err => {console.log(err)})}
+  }, [loggedIn]);
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
@@ -165,6 +168,8 @@ function App() {
     auth.register(email, password)
       .then(() => {
         history.push("/sign-in");
+        setIsAuthSuccess(true);
+        setIsInfoTooltipOpen(true);
       })
       .catch(err => {
         console.log(err);
@@ -184,8 +189,6 @@ function App() {
           setLoggedIn(true);
           setUserEmail(email);
           history.push("/");
-          setIsAuthSuccess(true);
-          setIsInfoTooltipOpen(true);
         } else {
           return Promise.reject("Ошибка: ответ не содержит данные токена.");
         }
@@ -256,7 +259,11 @@ function App() {
         </button>
       </PopupWithForm>
       <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-      <InfoTooltip isOpen={isInfoTooltipOpen} isSuccess={isAuthSuccess} onClose={closeAllPopups} />
+      <InfoTooltip 
+        isOpen={isInfoTooltipOpen} 
+        isSuccess={isAuthSuccess} 
+        onClose={closeAllPopups}
+        message={isAuthSuccess ? messageAuthSuccess: messageAuthFail} />
     </CurrentUserContext.Provider>
   );
 }
