@@ -48,6 +48,7 @@ function AuthForm({isPending, title, buttonTitle, buttonTitlePending, name, onSu
       </span>
       <button 
         className={`button auth-form__button-submit ${!isFormValid && "auth-form__button-submit_inactive"}`}
+        disabled={!isFormValid}
         type="submit">
         {isPending ? buttonTitlePending: buttonTitle}
       </button>

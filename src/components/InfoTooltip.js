@@ -7,7 +7,8 @@ function InfoTooltip({isOpen, isSuccess, onClose}) {
   };
 
   return (
-    <div className={`popup info-tooltip ${isOpen && "popup_opened"}`} onMouseDown={handlePopupMouseDown}>
+    <div 
+      className={`popup info-tooltip ${isOpen && "popup_opened"}`} onMouseDown={handlePopupMouseDown}>
       <div className="info-tooltip__container">
         <div className={`info-tooltip__status ${isSuccess ? "info-tooltip__status_type_success" : "info-tooltip__status_type_fail"}`}>
         </div>

@@ -15,7 +15,7 @@ import Register from "./Register";
 import api from "../utils/Api";
 import auth from "../utils/Auth"
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import { AuthContext } from "../contexts/AuthContext";
+
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -29,10 +29,11 @@ function App() {
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [isAuthSuccess, setIsAuthSuccess] = useState(false);
   
   const history = useHistory();
 
-  let isAuthSuccess = false;
+  const ESC_KEY = "Escape";
 
   useEffect(() => {
     api.batchFetch([api.getUserData(), api.getInitialCards()])
@@ -56,6 +57,18 @@ function App() {
         })
         .catch(err => {console.log(err)});
     }
+  }, []);
+
+  useEffect(() => {
+    const handleEscClose = (evt) => {
+      if (evt.key ===  ESC_KEY) {
+        closeAllPopups();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscClose);
+
+    return () => window.removeEventListener("keydown", handleEscClose);
   }, []);
 
   const handleEditAvatarClick = () => {
@@ -155,7 +168,7 @@ function App() {
       })
       .catch(err => {
         console.log(err);
-        isAuthSuccess = false;
+        setIsAuthSuccess(false);
         setIsInfoTooltipOpen(true);
       })
       .finally(() => {setIsPendingServerResponse(false)});
@@ -170,15 +183,16 @@ function App() {
           localStorage.setItem("jwt", data.token);
           setLoggedIn(true);
           setUserEmail(email);
-          isAuthSuccess = true;
-          setIsInfoTooltipOpen(true);
           history.push("/");
+          setIsAuthSuccess(true);
+          setIsInfoTooltipOpen(true);
+        } else {
+          return Promise.reject("Ошибка: ответ не содержит данные токена.");
         }
-        return Promise.reject("Ошибка: ответ не содержит данные токена.");
       })
       .catch(err => {
         console.log(err);
-        isAuthSuccess = false;
+        setIsAuthSuccess(false);
         setIsInfoTooltipOpen(true);
       })
       .finally(() => {setIsPendingServerResponse(false)});
@@ -190,59 +204,59 @@ function App() {
     setUserEmail("");
     history.push("/sign-in");
   }
-  console.log("app " + loggedIn);
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <AuthContext.Provider
-        value={{userEmail, handleLogout}}>
-        <Header 
-          loggedIn={loggedIn}/>
-        <Switch>
-          <ProtectedRoute
-            exact path="/"
-            component={Main}
-            cards={cards}
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            onCardClick={handleCardClick}
-            onCardLike={handleCardLike}
-            onCardDelete={handleCardDelete} />
-          <Route path="/sign-in">
-            <Login onSubmit={handleLogin}/>
-          </Route>
-          <Route path="/sign-up">
-            <Register onSubmit={handleRegister}/>
-          </Route>
-        </Switch>
-        <Footer/>
-        <EditProfilePopup 
-          isOpen={isEditProfilePopupOpen}
-          isPending={isPendingServerResponse}
-          onClose={closeAllPopups}
-          onUpdateUser={handleUpdateUser} />
-        <AddPlacePopup 
-          isOpen={isAddPlacePopupOpen}
-          isPending={isPendingServerResponse}
-          onClose={closeAllPopups}
-          onAddPlaceSubmit={handleAddPlaceSubmit} />
-        <EditAvatarPopup 
-          isOpen={isEditAvatarPopupOpen}
-          isPending={isPendingServerResponse}
-          onClose={closeAllPopups} 
-          onUpdateAvatar={handleUpdateAvatar} />
-        <PopupWithForm 
-          name="confirm" 
-          title="Вы уверены?"  
-          isOpen={deletedCard !== null}
-          onClose={closeAllPopups}>
-          <button className="popup-edit__button-save" type="submit" onClick={handleConfirmCardDelete}>
-            {isPendingServerResponse ? "Удаление...": "Да"}
-          </button>
-        </PopupWithForm>
-        <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-        <InfoTooltip isOpen={isInfoTooltipOpen} isSuccess={isAuthSuccess} onClose={closeAllPopups} />
-      </AuthContext.Provider>
+      <Header 
+        loggedIn={loggedIn}
+        userEmail={userEmail}
+        onLogout={handleLogout}/>
+      <Switch>
+        <ProtectedRoute
+          exact path="/"
+          component={Main}
+          cards={cards}
+          onEditProfile={handleEditProfileClick}
+          onAddPlace={handleAddPlaceClick}
+          onEditAvatar={handleEditAvatarClick}
+          onCardClick={handleCardClick}
+          onCardLike={handleCardLike}
+          onCardDelete={handleCardDelete}
+          loggedIn={loggedIn} />
+        <Route path="/sign-in">
+          <Login onSubmit={handleLogin}/>
+        </Route>
+        <Route path="/sign-up">
+          <Register onSubmit={handleRegister}/>
+        </Route>
+      </Switch>
+      <Footer/>
+      <EditProfilePopup 
+        isOpen={isEditProfilePopupOpen}
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups}
+        onUpdateUser={handleUpdateUser} />
+      <AddPlacePopup 
+        isOpen={isAddPlacePopupOpen}
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups}
+        onAddPlaceSubmit={handleAddPlaceSubmit} />
+      <EditAvatarPopup 
+        isOpen={isEditAvatarPopupOpen}
+        isPending={isPendingServerResponse}
+        onClose={closeAllPopups} 
+        onUpdateAvatar={handleUpdateAvatar} />
+      <PopupWithForm 
+        name="confirm" 
+        title="Вы уверены?"  
+        isOpen={deletedCard !== null}
+        onClose={closeAllPopups}>
+        <button className="popup-edit__button-save" type="submit" onClick={handleConfirmCardDelete}>
+          {isPendingServerResponse ? "Удаление...": "Да"}
+        </button>
+      </PopupWithForm>
+      <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+      <InfoTooltip isOpen={isInfoTooltipOpen} isSuccess={isAuthSuccess} onClose={closeAllPopups} />
     </CurrentUserContext.Provider>
   );
 }

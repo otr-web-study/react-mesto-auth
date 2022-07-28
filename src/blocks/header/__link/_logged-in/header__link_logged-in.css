@@ -1,11 +1,18 @@
 .header__link_logged-in {
   color: #A9A9A9;
+  margin-left: 24px;
 }
 
 @media screen and (max-width: 767px) {
-  .header__link_logged {
+  .header__link_logged-in {
     font-size: 18px;
     line-height: 22px;
-    margin-right: 30px;
+    margin: 0 30px;
+  }
+}
+
+@media screen and (max-width: 468px) {
+  .header__link_logged-in {
+    margin: 18px 0 40px;
   }
 }
