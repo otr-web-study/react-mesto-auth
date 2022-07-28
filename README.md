@@ -26,5 +26,5 @@ git clone https://github.com/otr-web-study/react-mesto-auth && cd react-mesto-au
 mpm install && npm start
 ```
 ### Ссылка на проект
-https://otr-web-study.github.io/mesto-react/
+https://otr-web-study.github.io/react-mesto-auth/
 
